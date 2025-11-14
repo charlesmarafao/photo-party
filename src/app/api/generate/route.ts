@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
 		const { url: generatedUrl } = await put(`${EVENT_SLUG}/${id}/generated.png`, outBuffer, {
 			access: "public",
 			contentType: "image/png",
+			token: process.env.BLOB_READ_WRITE_TOKEN,
 		});
 
 		item.generatedUrl = generatedUrl;

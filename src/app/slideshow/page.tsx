@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { Spotlight } from "@/components/ui/spotlight";
 
 interface Item {
 	id: string;
@@ -55,6 +56,7 @@ export default function SlideshowPage() {
 
 	return (
 		<div className="fixed inset-0 bg-black">
+			<Spotlight className="left-[-10%] top-[-10%]" />
 			{current?.generatedUrl ? (
 				<Image
 					key={current.id}
@@ -69,7 +71,7 @@ export default function SlideshowPage() {
 					Aguardando fotos aprovadas...
 				</div>
 			)}
-			<div className="absolute top-4 left-4 text-white font-semibold text-lg">
+			<div className="absolute top-4 left-4 text-white font-semibold text-lg heading">
 				Aniversário da Ana
 			</div>
 			<div className="absolute bottom-4 left-4 text-white/80 text-sm">

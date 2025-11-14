@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
 		const { url: originalUrl } = await put(filename, Buffer.from(arrayBuffer), {
 			access: "public",
 			contentType,
+			token: process.env.BLOB_READ_WRITE_TOKEN,
 		});
 
 		const kv = getKV();

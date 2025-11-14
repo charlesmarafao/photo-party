@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Spotlight } from "@/components/ui/spotlight";
 import Image from "next/image";
 
 type Step = 1 | 2 | 3;
@@ -126,87 +128,104 @@ export default function HomePage() {
 	}
 
 	return (
-		<div className="mx-auto max-w-xl px-4 py-8">
-			<h1 className="text-2xl font-semibold text-center mb-2">Aniversário da Ana</h1>
-			<p className="text-center text-sm text-muted-foreground mb-6">
-				2 passos: 1) Envie sua foto  2) Escolha o tema e aprove
-			</p>
-
-			{/* Passo 1 */}
-			<div className="rounded-lg border p-4 mb-4">
-				<h2 className="font-medium mb-2">Passo 1 — Envie sua foto</h2>
-				<div className="flex items-center gap-2">
-					<Input
-						ref={fileInputRef}
-						type="file"
-						accept="image/*"
-						onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-					/>
-					<Button onClick={handleUpload} disabled={isUploading || !file}>
-						{isUploading ? "Enviando..." : "Enviar"}
-					</Button>
+		<div className="relative">
+			<Spotlight className="left-0 top-[-20%]" />
+			<div className="relative mx-auto max-w-2xl px-4 py-10">
+				<h1 className="heading text-3xl font-semibold text-center mb-2">Aniversário da Ana</h1>
+				<div className="mx-auto mt-2 mb-8 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+					<div className={`px-2 py-1 rounded-md ${step >= 1 ? "bg-primary/20 text-primary-foreground/90" : "bg-muted"}`}>1/3 Enviar</div>
+					<div className={`px-2 py-1 rounded-md ${step >= 2 ? "bg-primary/20 text-primary-foreground/90" : "bg-muted"}`}>2/3 Tema</div>
+					<div className={`px-2 py-1 rounded-md ${step >= 3 ? "bg-primary/20 text-primary-foreground/90" : "bg-muted"}`}>3/3 Aprovar</div>
 				</div>
-			</div>
 
-			{/* Passo 2: aparece só depois do upload */}
-			{step >= 2 && (
-				<div className="rounded-lg border p-4 mb-4">
-					<h2 className="font-medium mb-2">Passo 2 — Escolha um tema</h2>
-					<div className="flex items-center gap-2">
-						<Select value={theme} onValueChange={(v) => setTheme(v as ThemeKey)}>
-							<SelectTrigger className="w-full">
-								<SelectValue placeholder="Selecione um tema" />
-							</SelectTrigger>
-							<SelectContent>
-								{themes.map((t) => (
-									<SelectItem key={t.key} value={t.key}>
-										{t.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						<Button onClick={handleGenerate} disabled={isGenerating || !currentId || !theme}>
-							{isGenerating ? "Gerando..." : "Gerar"}
-						</Button>
-					</div>
-					{/* Futuro: preview por tema (placeholder visual simples) */}
-					{theme && (
-						<div className="mt-3 text-xs text-muted-foreground">
-							Prévia do tema ficará aqui futuramente.
+				{/* Passo 1 */}
+				<Card className="mb-4 relative overflow-hidden">
+					<CardHeader>
+						<CardTitle>Passo 1 — Envie sua foto</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="flex items-center gap-2">
+							<Input
+								ref={fileInputRef}
+								type="file"
+								accept="image/*"
+								onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+							/>
+							<Button className="btn-primary" onClick={handleUpload} disabled={isUploading || !file}>
+								{isUploading ? "Enviando..." : "Enviar"}
+							</Button>
 						</div>
-					)}
-				</div>
-			)}
+					</CardContent>
+				</Card>
+
+				{/* Passo 2: aparece só depois do upload */}
+				{step >= 2 && (
+					<Card className="mb-4 relative overflow-hidden">
+						<CardHeader>
+							<CardTitle>Passo 2 — Escolha um tema</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="flex items-center gap-2">
+								<Select value={theme} onValueChange={(v) => setTheme(v as ThemeKey)}>
+									<SelectTrigger className="w-full">
+										<SelectValue placeholder="Selecione um tema" />
+									</SelectTrigger>
+									<SelectContent>
+										{themes.map((t) => (
+											<SelectItem key={t.key} value={t.key}>
+												{t.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<Button className="btn-primary" onClick={handleGenerate} disabled={isGenerating || !currentId || !theme}>
+									{isGenerating ? "Gerando..." : "Gerar"}
+								</Button>
+							</div>
+							{/* Futuro: preview por tema (placeholder visual simples) */}
+							{theme && (
+								<div className="mt-3 text-xs text-muted-foreground">
+									Prévia do tema ficará aqui futuramente.
+								</div>
+							)}
+						</CardContent>
+					</Card>
+				)}
 
 			{/* Aprovação */}
-			{step >= 3 && (
-				<div className="rounded-lg border p-4 mb-4">
-					<h2 className="font-medium mb-2">Prévia — Aprove para exibir no telão</h2>
-					<div className="relative w-full aspect-square bg-muted rounded overflow-hidden">
-						{previewUrl ? (
-							<Image src={previewUrl} alt="Prévia" fill className="object-contain" />
-						) : (
-							<div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">Processando...</div>
-						)}
-					</div>
-					<div className="mt-3 flex gap-2">
-						<Button onClick={handleApprove} disabled={!previewUrl}>
-							Aprovar para o telão
-						</Button>
-						{downloadUrl && (
-							<a className="inline-flex h-10 items-center rounded-md border px-3 text-sm" href={downloadUrl} download>
-								Baixar PNG
-							</a>
-						)}
-						<Button variant="secondary" onClick={resetAll}>
-							Enviar outra
-						</Button>
-					</div>
-				</div>
-			)}
+				{step >= 3 && (
+					<Card className="mb-4 relative overflow-hidden">
+						<CardHeader>
+							<CardTitle>Prévia — Aprove para exibir no telão</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="relative w-full aspect-square bg-muted rounded overflow-hidden">
+								{previewUrl ? (
+									<Image src={previewUrl} alt="Prévia" fill className="object-contain" />
+								) : (
+									<div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">Processando...</div>
+								)}
+							</div>
+							<div className="mt-3 flex gap-2">
+								<Button className="btn-primary" onClick={handleApprove} disabled={!previewUrl}>
+									Aprovar para o telão
+								</Button>
+								{downloadUrl && (
+									<a className="inline-flex h-10 items-center rounded-md border px-3 text-sm" href={downloadUrl} download>
+										Baixar PNG
+									</a>
+								)}
+								<Button variant="secondary" onClick={resetAll}>
+									Enviar outra
+								</Button>
+							</div>
+						</CardContent>
+					</Card>
+				)}
 
-			<div className="text-center text-xs text-muted-foreground mt-6">
-				Logo do patrocinador aqui (placeholder)
+				<div className="text-center text-xs text-muted-foreground mt-6">
+					Logo do patrocinador aqui (placeholder)
+				</div>
 			</div>
 		</div>
 	);
