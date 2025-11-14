@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { THEMES, type ThemeKey } from "@/constants/themes";
+import { THEMES, THEME_LIST, type ThemeKey } from "@/constants/themes";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ export default function HomePage() {
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 	const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
-	const themesEntries = useMemo(() => Object.entries(THEMES) as [ThemeKey, string][], []);
+	const themes = useMemo(() => THEME_LIST, []);
 
 	useEffect(() => {
 		if (!currentId) return;
@@ -94,7 +94,7 @@ export default function HomePage() {
 			const res = await fetch("/api/generate", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ id: currentId, prompt }),
+				body: JSON.stringify({ id: currentId, prompt, themeKey: theme }),
 			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data?.error ?? "Falha na geração.");
@@ -148,27 +148,35 @@ export default function HomePage() {
 				</div>
 			</div>
 
-			{/* Passo 2 */}
-			<div className="rounded-lg border p-4 mb-4 opacity-100">
-				<h2 className="font-medium mb-2">Passo 2 — Escolha um tema</h2>
-				<div className="flex items-center gap-2">
-					<Select value={theme} onValueChange={(v) => setTheme(v as ThemeKey)}>
-						<SelectTrigger className="w-full">
-							<SelectValue placeholder="Selecione um tema" />
-						</SelectTrigger>
-						<SelectContent>
-							{themesEntries.map(([key, label]) => (
-								<SelectItem key={key} value={key}>
-									{label}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-					<Button onClick={handleGenerate} disabled={isGenerating || !currentId || !theme || step < 2}>
-						{isGenerating ? "Gerando..." : "Gerar"}
-					</Button>
+			{/* Passo 2: aparece só depois do upload */}
+			{step >= 2 && (
+				<div className="rounded-lg border p-4 mb-4">
+					<h2 className="font-medium mb-2">Passo 2 — Escolha um tema</h2>
+					<div className="flex items-center gap-2">
+						<Select value={theme} onValueChange={(v) => setTheme(v as ThemeKey)}>
+							<SelectTrigger className="w-full">
+								<SelectValue placeholder="Selecione um tema" />
+							</SelectTrigger>
+							<SelectContent>
+								{themes.map((t) => (
+									<SelectItem key={t.key} value={t.key}>
+										{t.name}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<Button onClick={handleGenerate} disabled={isGenerating || !currentId || !theme}>
+							{isGenerating ? "Gerando..." : "Gerar"}
+						</Button>
+					</div>
+					{/* Futuro: preview por tema (placeholder visual simples) */}
+					{theme && (
+						<div className="mt-3 text-xs text-muted-foreground">
+							Prévia do tema ficará aqui futuramente.
+						</div>
+					)}
 				</div>
-			</div>
+			)}
 
 			{/* Aprovação */}
 			{step >= 3 && (

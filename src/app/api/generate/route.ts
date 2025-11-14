@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
 	try {
-		const { id, prompt: promptOverride } = await req.json();
+		const { id, prompt: promptOverride, themeKey } = await req.json();
 		if (!id) {
 			return NextResponse.json({ error: "id é obrigatório." }, { status: 400 });
 		}
@@ -58,6 +58,12 @@ export async function POST(req: NextRequest) {
 		});
 
 		item.generatedUrl = generatedUrl;
+		if (themeKey && typeof themeKey === "string") {
+			item.themeKey = themeKey;
+		}
+		if (effectivePrompt) {
+			item.prompt = effectivePrompt;
+		}
 		item.status = "ready";
 		item.updatedAt = Date.now();
 		await kv.set(`photo:${id}`, item);
